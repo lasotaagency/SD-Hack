@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload and Coordinates Display</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="image">
+        <input type="submit" value="Upload">
+    </form>
+    {% if image_url %}
+        <img src="{{ image_url }}" alt="uploaded-image" id="uploaded-image">
+        <p id="coordinates">Coordinates: (0, 0)</p>
+        <input type="text" id="input-text" placeholder="Enter your text here">
+        <button id="submit-data">Submit Data</button>
+    {% endif %}
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
