@@ -6,7 +6,7 @@ def generate_image(image_path, mask_path, text, api_key=None):
     if api_key is None:
         raise Exception("Missing Stability API key.")
 
-    engine_id = "stable-inpainting-512-v2-0"
+    engine_id = "stable-diffusion-512-v2-1"
     api_host = os.getenv('API_HOST', 'https://api.stability.ai')
 
     response = requests.post(
@@ -22,10 +22,10 @@ def generate_image(image_path, mask_path, text, api_key=None):
         data={
             "mask_source": "MASK_IMAGE_WHITE",
             "text_prompts[0][text]": text,
-            "cfg_scale": 7,
+            "cfg_scale": 20,
             "clip_guidance_preset": "FAST_BLUE",
             "samples": 1,
-            "steps": 30,
+            "steps": 50,
         }
     )
 

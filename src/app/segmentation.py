@@ -11,9 +11,9 @@ def save_image_mask(mask, filename):
     :param mask: A 2D numpy array (image mask) containing integer values
     :param filename: The output file path, including the extension (.jpg or .png)
     """
-    # Convert the numpy array to a Pillow Image object
-    mask_image = Image.fromarray(mask, mode='L')
 
+    # Convert the numpy array to a Pillow Image object
+    mask_image = Image.fromarray(mask)
     # Save the image to a file
     mask_image.save(filename)
 

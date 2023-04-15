@@ -38,8 +38,12 @@ if (submitDataBtn) {
         if (data.status === "success") {
             alert("Data submitted successfully!");
 
+            // Hide the uploaded image container
+            document.getElementById("uploaded-image-container").style.display = "none";
+
             // Display the generated images
             const generatedImagesContainer = document.getElementById("generated-images");
+            generatedImagesContainer.style.display = "block"; // Make the container visible
             data.generated_images.forEach((imageUrl) => {
                 const img = document.createElement("img");
                 img.src = imageUrl;
