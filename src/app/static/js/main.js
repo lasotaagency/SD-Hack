@@ -18,6 +18,8 @@ if (image) {
 if (submitDataBtn) {
     submitDataBtn.addEventListener("click", async () => {
         const text = inputText.value.trim();
+        const selectedOption = document.getElementById("options").value;
+
         if (text === '') {
             alert("Please enter some text");
             return;
@@ -31,6 +33,7 @@ if (submitDataBtn) {
                 image_url: image.src,
                 coordinates: [selectedCoordinates.x, selectedCoordinates.y],
                 text: text,
+                option: selectedOption,
             }),
         });
 

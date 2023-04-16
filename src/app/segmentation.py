@@ -8,7 +8,7 @@ def save_image_mask(mask, filename):
     """
     Save an image mask to a JPG or PNG file.
 
-    :param mask: A 2D numpy array (image mask) containing integer values
+    :param mask: A 2D numpy array (image mask) containing boolean values
     :param filename: The output file path, including the extension (.jpg or .png)
     """
 
@@ -17,7 +17,7 @@ def save_image_mask(mask, filename):
     # Save the image to a file
     mask_image.save(filename)
 
-def get_mask(predictor, image_path, input_point, filename="static/masks/mask.png"):
+def get_SAM_mask(predictor, image_path, input_point, filename="static/masks/mask.png"):
     image = cv2.imread(image_path)
     predictor.set_image(image)
     input_label = np.array([1])
@@ -39,3 +39,15 @@ def startup_sam():
 
     predictor = SamPredictor(sam)
     return predictor
+
+def get_lang_sam_mask(model, image_path, text_prompt):
+    image_pil = Image.open(image_path)
+    masks, boxes, phrases, logits = model.predict(image_pil, text_prompt)
+    if len(logits) > 0:
+        if np.max(logits.numpy()) > 0.5:
+            bestmask = masks[np.argmax(logits)].numpy()
+
+            filename = f"static/masks/{text_prompt}_mask.png"
+            save_image_mask(bestmask, filename)
+            return text_prompt, filename 
+    return None, None

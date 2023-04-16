@@ -7,10 +7,12 @@ import matplotlib.pyplot as plt
 import cv2
 import sys
 from PIL import Image
+import timeit
 
-from segmentation import get_mask, startup_sam
+from segmentation import get_SAM_mask, startup_sam, get_lang_sam_mask
 from inpainting import generate_image
 from config import SD_API_KEY
+from lang_sam import LangSAM
 
 app = Flask(__name__)
 app.config["IMAGE_UPLOADS"] = "static/uploads"
@@ -23,10 +25,23 @@ def upload_image():
             image_path = os.path.join(app.config["IMAGE_UPLOADS"], image.filename)
             image.save(image_path)
 
+            articles_detected = []
+
             resized_image_path = resize_image(image_path, app.config["IMAGE_UPLOADS"], image.filename)
             
             resized_image_url = url_for('static', filename=f'uploads/{os.path.basename(resized_image_path)}')
-            return render_template("index.html", image_url=resized_image_url)
+            for text_prompt in clothing_types:
+                st = timeit.default_timer()
+                # mask_path = get_mask(predictor, image_path, np.array([[x,y]]))
+                article, filename = get_lang_sam_mask(model, resized_image_path, text_prompt)
+
+                if article:
+                    mask_map[article] = filename
+                    articles_detected.append(article)
+                et = timeit.default_timer()
+                print(f"Time taken to generate {text_prompt} mask: {et-st} seconds")
+
+            return render_template("index.html", image_url=resized_image_url, articles_detected=articles_detected)
         
     return render_template("index.html")
 
@@ -38,10 +53,13 @@ def submit_data():
     x, y = data['coordinates']
 
     image_path = os.path.join(app.config["IMAGE_UPLOADS"], os.path.basename(image_url))
-    mask_path = get_mask(predictor, image_path, np.array([[x,y]]))
 
-    generated_image_paths = generate_image(image_path, mask_path, text, api_key=SD_API_KEY)
-    print(generated_image_paths)
+    st = timeit.default_timer()
+    option = data['option']
+
+    generated_image_paths = generate_image(image_path, mask_map[option], text, api_key=SD_API_KEY)
+    et = timeit.default_timer()
+    print('Time taken to generate images from API: {} seconds'.format(et-st))
 
     return jsonify({"status": "success", "generated_images": generated_image_paths})
 
@@ -74,6 +92,10 @@ def resize_image(image_path, output_folder, filename, multiple=64):
     return resized_image_path
 
 if __name__ == "__main__":
-    predictor = startup_sam()
-    print("SAM Running Locally")
+    # predictor = startup_sam()
+    model = LangSAM()
+    clothing_types = ["sweater", "shirt", "shorts", "skirt", "pants", "jeans", "jacket", "socks", "shoes", "belt", "sunglasses"]
+    mask_map = {}
+
+    print("SAM / LangSAM Running Locally")
     app.run(debug=True)

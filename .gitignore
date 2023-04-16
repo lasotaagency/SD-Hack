@@ -3,3 +3,6 @@ checkpoints/
 src/app/__pycache__/
 src/app/checkpoints/
 src/app/config.py
+*.pyc
+*.pth
+*.png

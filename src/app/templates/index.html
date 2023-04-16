@@ -15,6 +15,11 @@
         <div id="uploaded-image-container">
             <img src="{{ image_url }}" alt="uploaded-image" id="uploaded-image">
             <p id="coordinates">Coordinates: (0, 0)</p>
+            <select id="options">
+                {% for article in articles_detected %}
+                    <option value="{{ article }}">{{ article }}</option>
+                {% endfor %}
+            </select>
             <input type="text" id="input-text" placeholder="Enter your text here">
             <button id="submit-data">Submit Data</button>
         </div>
