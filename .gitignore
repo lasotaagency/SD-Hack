@@ -6,3 +6,4 @@ src/app/config.py
 *.pyc
 *.pth
 *.png
+*.ipynb

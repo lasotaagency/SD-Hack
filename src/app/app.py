@@ -69,8 +69,8 @@ def submit_data():
     st = timeit.default_timer()
     option = data['option']
 
-    # image_alpha_path = add_alpha_channel(image_path, mask_map[option])
-    generated_image_paths = generate_image(image_path, mask_map[option], text, api_key=SD_API_KEY)
+    image_alpha_path = add_alpha_channel(image_path, mask_map[option])
+    generated_image_paths = generate_image(image_alpha_path, mask_map[option], text, api_key=SD_API_KEY)
     et = timeit.default_timer()
     print('Time taken to generate images from API: {} seconds'.format(et-st))
 

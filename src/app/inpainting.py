@@ -8,17 +8,22 @@ import time
 def add_alpha_channel(image_path, mask_path, transparency=0.5):
     # Open the image and mask
     image = Image.open(image_path)
-    mask = Image.open(mask_path).convert('L')  # convert to grayscale
+    mask = Image.open(mask_path).convert('L')
+#     mask = ImageOps.invert(mask)# convert to grayscale
 
     # Create a new RGBA image with the same size as the original image
     alpha = Image.new('RGBA', image.size, (0, 0, 0, 0))
 
     # Set the alpha channel values based on the mask, using the specified transparency
-    alpha.putdata([(0, 0, 0, int(255 * (1 - transparency) * mask_value)) for mask_value in mask.getdata()])
+    alpha.putdata([(0, 0, 0, 255 - int(transparency * mask_value)) for mask_value in mask.getdata()])
 
-    # Merge the original image and the alpha channel image
-    result = Image.alpha_composite(image.convert('RGBA'), alpha)
+    r1, g1, b1 = image.split()
+    _, _, _, a2 = alpha.split()
+    
+    result = Image.merge('RGBA', (r1, g1, b1, a2))
+
     result.save("./static/masks/image_alpha.png")
+
     # Save the result as a PNG file
     return "./static/masks/image_alpha.png"
 
@@ -27,6 +32,7 @@ def generate_image(image_path, mask_path, text, api_key=None):
         raise Exception("Missing Stability API key.")
 
     engine_id = "stable-diffusion-512-v2-1"
+    # engine_id = "stable-inpainting-512-v2-0"
     api_host = os.getenv('API_HOST', 'https://api.stability.ai')
 
     response = requests.post(
@@ -37,14 +43,14 @@ def generate_image(image_path, mask_path, text, api_key=None):
         },
         files={
             'init_image': open(image_path, 'rb'),
-            'mask_image': open(mask_path, 'rb'),
+            # 'mask_image': open(mask_path, 'rb'),
         },
         data={
-            "mask_source": "MASK_IMAGE_WHITE",
+            "mask_source": "INIT_IMAGE_ALPHA",
             "text_prompts[0][text]": text,
-            "cfg_scale": 20,
+            "cfg_scale": 7,
             "clip_guidance_preset": "FAST_BLUE",
-            "samples": 1,
+            "samples": 2,
             "steps": 50,
         }
     )
