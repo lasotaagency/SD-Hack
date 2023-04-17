@@ -1,6 +1,26 @@
 import base64
 import os
 import requests
+from PIL import Image
+import numpy as np
+import time
+
+def add_alpha_channel(image_path, mask_path, transparency=0.5):
+    # Open the image and mask
+    image = Image.open(image_path)
+    mask = Image.open(mask_path).convert('L')  # convert to grayscale
+
+    # Create a new RGBA image with the same size as the original image
+    alpha = Image.new('RGBA', image.size, (0, 0, 0, 0))
+
+    # Set the alpha channel values based on the mask, using the specified transparency
+    alpha.putdata([(0, 0, 0, int(255 * (1 - transparency) * mask_value)) for mask_value in mask.getdata()])
+
+    # Merge the original image and the alpha channel image
+    result = Image.alpha_composite(image.convert('RGBA'), alpha)
+    result.save("./static/masks/image_alpha.png")
+    # Save the result as a PNG file
+    return "./static/masks/image_alpha.png"
 
 def generate_image(image_path, mask_path, text, api_key=None):
     if api_key is None:
@@ -38,7 +58,10 @@ def generate_image(image_path, mask_path, text, api_key=None):
     generated_image_paths = []
 
     for i, image in enumerate(data["artifacts"]):
-        output_path = f"./static/diffusion_outputs/img2img_masking_{i}.png"
+        # Generate a unique file name using a timestamp
+        timestamp = int(time.time() * 1000)
+        output_path = f"./static/images/img2img_masking_{i}_{timestamp}.png"
+
         with open(output_path, "wb") as f:
             f.write(base64.b64decode(image["base64"]))
         generated_image_paths.append(output_path)

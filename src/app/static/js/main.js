@@ -5,6 +5,11 @@ const submitDataBtn = document.getElementById("submit-data");
 
 let selectedCoordinates = { x: 0, y: 0 };
 
+function replaceUploadedWithGeneratedImage(imageUrl) {
+    const uploadedImage = document.getElementById("uploaded-image");
+    uploadedImage.src = imageUrl;
+}
+
 if (image) {
     image.addEventListener("click", (e) => {
         const rect = e.target.getBoundingClientRect();
@@ -42,7 +47,9 @@ if (submitDataBtn) {
             alert("Data submitted successfully!");
 
             // Hide the uploaded image container
-            document.getElementById("uploaded-image-container").style.display = "none";
+            // document.getElementById("uploaded-image-container").style.display = "none";
+
+            replaceUploadedWithGeneratedImage(data.generated_images[0]);
 
             // Display the generated images
             const generatedImagesContainer = document.getElementById("generated-images");

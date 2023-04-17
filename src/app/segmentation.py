@@ -17,7 +17,7 @@ def save_image_mask(mask, filename):
     # Save the image to a file
     mask_image.save(filename)
 
-def get_SAM_mask(predictor, image_path, input_point, filename="static/masks/mask.png"):
+def get_SAM_mask(predictor, image_path, input_point, filename="static/masks/custom_mask.png"):
     image = cv2.imread(image_path)
     predictor.set_image(image)
     input_label = np.array([1])
