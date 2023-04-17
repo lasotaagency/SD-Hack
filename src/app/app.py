@@ -12,7 +12,7 @@ import base64
 import redis
 
 from segmentation import get_SAM_mask, startup_sam, get_lang_sam_mask
-from inpainting import generate_image, add_alpha_channel
+from inpainting import generate_image, add_alpha_channel, generate_image_upscale
 from config import SD_API_KEY
 from lang_sam import LangSAM
 
@@ -71,6 +71,8 @@ def submit_data():
 
     image_alpha_path = add_alpha_channel(image_path, mask_map[option])
     generated_image_paths = generate_image(image_alpha_path, mask_map[option], text, api_key=SD_API_KEY)
+    # for image_path in generated_image_paths:
+        # generate_image_upscale(image_path, api_key=SD_API_KEY)
     et = timeit.default_timer()
     print('Time taken to generate images from API: {} seconds'.format(et-st))
 

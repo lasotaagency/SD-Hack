@@ -73,3 +73,28 @@ def generate_image(image_path, mask_path, text, api_key=None):
         generated_image_paths.append(output_path)
 
     return generated_image_paths
+
+def generate_image_upscale(image_path, api_key=None):
+    if api_key is None:
+            raise Exception("Missing Stability API key.")
+
+    engine_id = "esrgan-v1-x2plus"
+    # engine_id = "stable-inpainting-512-v2-0"
+    api_host = os.getenv('API_HOST', 'https://api.stability.ai')
+
+    response = requests.post(
+        f"{api_host}/v1/generation/{engine_id}/image-to-image/upscale",
+        headers={
+            "Accept": "image/png",
+            "Authorization": f"Bearer {api_key}"
+        },
+        files={
+            "image": open(image_path, "rb")
+        }
+    )
+
+    if response.status_code != 200:
+        raise Exception("Non-200 response: " + str(response.text))
+
+    with open(image_path, "wb") as f:
+        f.write(response.content)

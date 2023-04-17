@@ -2,12 +2,25 @@ const image = document.getElementById("uploaded-image");
 const coordinatesDisplay = document.getElementById("coordinates");
 const inputText = document.getElementById("input-text");
 const submitDataBtn = document.getElementById("submit-data");
+const resetBtn = document.getElementById("reset");
 
 let selectedCoordinates = { x: 0, y: 0 };
 
 function replaceUploadedWithGeneratedImage(imageUrl) {
     const uploadedImage = document.getElementById("uploaded-image");
     uploadedImage.src = imageUrl;
+}
+
+function clearGeneratedImages() {
+    const generatedImagesContainer = document.getElementById("generated-images");
+    while (generatedImagesContainer.firstChild) {
+        generatedImagesContainer.removeChild(generatedImagesContainer.firstChild);
+    }
+
+    const uploadedImage = document.getElementById("uploaded-image");
+    if (uploadedImage) {
+        uploadedImage.src = "";
+    }
 }
 
 if (image) {
@@ -63,5 +76,11 @@ if (submitDataBtn) {
         } else {
             alert("Failed to submit data. Please try again.");
         }
+    });
+}
+
+if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+        clearGeneratedImages();
     });
 }
