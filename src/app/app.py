@@ -4,15 +4,13 @@ from segment_anything import sam_model_registry, SamPredictor
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
-import cv2
-import sys
 from PIL import Image, ImageOps
 import timeit
-import base64
 import redis
+from diffusers import DiffusionPipeline
 
-from segmentation import get_SAM_mask, startup_sam, get_lang_sam_mask
-from inpainting import generate_image, add_alpha_channel, generate_image_upscale
+from segmentation import get_lang_sam_mask
+from inpainting import generate_image, add_alpha_channel, generate_image_upscale, paint_by_example
 from config import SD_API_KEY
 from lang_sam import LangSAM
 
@@ -49,33 +47,59 @@ def upload_image():
                 bg_mask.save('./static/masks/background_mask.png')
                 mask_map['background'] = './static/masks/background_mask.png'
 
-            # for key in mask_map:
-            #     r.set(key, image_file_to_base64(mask_map[key]))
-
+            # model = 0
             return render_template("index.html", image_url=resized_image_url, articles_detected=list(mask_map.keys()), masks=list(mask_map.values()))
         
     return render_template("index.html")
 
+@app.route("/upload_additional_image", methods=["POST"])
+def upload_additional_image():
+    if request.method == "POST":
+        if request.files:
+            image = request.files["additional_image"]
+            image_path = os.path.join(app.config["IMAGE_UPLOADS"], image.filename)
+            image.save(image_path)
+
+            image_url = url_for("static", filename=os.path.join("images", image.filename))
+
+            return jsonify({"status": "success", "image_url": image_url})
+
+    return jsonify({"status": "error", "message": "Invalid request"})
+
+
 @app.route("/submit", methods=["POST"])
 def submit_data():
     data = request.get_json()
+    print('started generating images')
     image_url = data['image_url']
-    text = data['text']
     x, y = data['coordinates']
+    model = 0
 
-    print("Submitted Image url is: ", image_url)
-    image_path = os.path.join(app.config["IMAGE_UPLOADS"], os.path.basename(image_url))
+    if data['condition_type'] == "text":
+        print("Started Text Conditioning")
+        image_path = os.path.join(app.config["IMAGE_UPLOADS"], os.path.basename(image_url))
 
-    st = timeit.default_timer()
-    option = data['option']
+        st = timeit.default_timer()
+        option = data['option']
 
-    image_alpha_path = add_alpha_channel(image_path, mask_map[option])
-    generated_image_paths = generate_image(image_alpha_path, mask_map[option], text, api_key=SD_API_KEY)
-    # for image_path in generated_image_paths:
-        # generate_image_upscale(image_path, api_key=SD_API_KEY)
-    et = timeit.default_timer()
-    print('Time taken to generate images from API: {} seconds'.format(et-st))
+        image_alpha_path = add_alpha_channel(image_path, mask_map[option])
+        generated_image_paths = generate_image(image_alpha_path, mask_map[option], data["condition_data"], api_key=SD_API_KEY)
 
+        et = timeit.default_timer()
+        print('Time taken to generate images from API: {} seconds'.format(et-st))
+
+    else:
+        print("Started Image Conditioning")
+        image_cond = data['condition_data']
+        image_cond_path = os.path.join(app.config["IMAGE_UPLOADS"], os.path.basename(image_cond))
+        st = timeit.default_timer()
+        option = data['option']
+        resized_image_path = os.path.join(app.config["IMAGE_UPLOADS"], os.path.basename(image_url))
+        generated_image_paths = paint_by_example(resized_image_path, mask_map[option], image_cond_path, 2)
+        et = timeit.default_timer()
+        print('Time taken to generate inpainted from diffuser: {} seconds'.format(et-st))
+
+    print(generated_image_paths)
     return jsonify({"status": "success", "generated_images": generated_image_paths})
 
 
@@ -106,18 +130,20 @@ def resize_image(image_path, output_folder, filename, multiple=64):
     print("Resized image saved to", resized_image_path)
     return resized_image_path
 
-# def image_file_to_base64(image_path):
-#     with open(image_path, "rb") as f:
-#         img_data = f.read()
-#     return base64.b64encode(img_data).decode('utf-8')
-
 if __name__ == "__main__":
     # predictor = startup_sam()
-    model = LangSAM()
+    model = LangSAM(device='cuda')
     clothing_types = ["sweater", "shirt", "shorts", "skirt", "pants", "jeans", "jacket", "socks", "shoes", "belt", "sunglasses", "person"]
     mask_map = {}
-
-    # r = redis.Redis(host='localhost', port=6379, decode_responses=True)
-
     print("SAM / LangSAM Running Locally")
-    app.run(debug=True)
+
+    # pipe = DiffusionPipeline.from_pretrained(
+    # "Fantasy-Studio/Paint-by-Example",
+    # torch_dtype=torch.float16,
+    # )
+
+    # pipe = pipe.to(device)
+    # print("Inpainting Pipe Running Locally")
+    # r = redis.Redis(host='localhost', port=6379, decode_responses=True)
+    
+    app.run(debug=True, reloader_type='stat')

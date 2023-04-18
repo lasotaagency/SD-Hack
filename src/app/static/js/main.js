@@ -1,6 +1,7 @@
 const image = document.getElementById("uploaded-image");
 const coordinatesDisplay = document.getElementById("coordinates");
 const inputText = document.getElementById("input-text");
+const inputImage = document.getElementById("input-image"); // Declare inputImage only once
 const submitDataBtn = document.getElementById("submit-data");
 const resetBtn = document.getElementById("reset");
 
@@ -33,15 +34,64 @@ if (image) {
     });
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    const textOption = document.getElementById('text-option');
+    const imageOption = document.getElementById('image-option');
+
+    function updateInputDisplay() {
+        if (textOption.checked) {
+            inputText.style.display = 'inline-block';
+            inputImage.style.display = 'none';
+        } else if (imageOption.checked) {
+            inputText.style.display = 'none';
+            inputImage.style.display = 'inline-block';
+        }
+    }
+
+    textOption.addEventListener('change', updateInputDisplay);
+    imageOption.addEventListener('change', updateInputDisplay);
+
+    updateInputDisplay();
+});
+
 if (submitDataBtn) {
     submitDataBtn.addEventListener("click", async () => {
-        const text = inputText.value.trim();
         const selectedOption = document.getElementById("options").value;
+        const textOption = document.getElementById('text-option');
+        const conditionType = textOption.checked ? "text" : "image";
+        let conditionData;
 
-        if (text === '') {
-            alert("Please enter some text");
-            return;
+        if (conditionType === "text") {
+            const text = inputText.value.trim();
+            if (text === '') {
+                alert("Please enter some text");
+                return;
+            }
+            conditionData = text;
+        } else {
+            const file = inputImage.files[0];
+            if (!file) {
+                alert("Please select an image to upload");
+                return;
+            }
+            const formData = new FormData();
+            formData.append("additional_image", file);
+
+            // Upload the additional image
+            const uploadResponse = await fetch("/upload_additional_image", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!uploadResponse.ok) {
+                alert("Failed to upload the additional image. Please try again.");
+                return;
+            }
+
+            const uploadData = await uploadResponse.json();
+            conditionData = uploadData.image_url;
         }
+
         const response = await fetch("/submit", {
             method: "POST",
             headers: {
@@ -50,17 +100,15 @@ if (submitDataBtn) {
             body: JSON.stringify({
                 image_url: image.src,
                 coordinates: [selectedCoordinates.x, selectedCoordinates.y],
-                text: text,
                 option: selectedOption,
+                condition_type: conditionType,
+                condition_data: conditionData,
             }),
         });
 
         const data = await response.json();
         if (data.status === "success") {
             alert("Data submitted successfully!");
-
-            // Hide the uploaded image container
-            // document.getElementById("uploaded-image-container").style.display = "none";
 
             replaceUploadedWithGeneratedImage(data.generated_images[0]);
 

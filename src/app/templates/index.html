@@ -20,7 +20,14 @@
                     <option value="{{ article }}">{{ article }}</option>
                 {% endfor %}
             </select>
+            <div>
+                <input type="radio" name="input_type" value="text" id="text-option" checked>
+                <label for="text-option">Text</label>
+                <input type="radio" name="input_type" value="image" id="image-option">
+                <label for="image-option">Image</label>
+            </div>
             <input type="text" id="input-text" placeholder="Enter your text here">
+            <input type="file" id="input-image" style="display: none;">
             <button id="submit-data">Submit Data</button>
             <button id="reset">Reset</button>
         </div>

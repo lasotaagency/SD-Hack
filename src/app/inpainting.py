@@ -5,6 +5,7 @@ from PIL import Image
 import numpy as np
 import time
 from diffusers import DiffusionPipeline
+import torch
 
 def add_alpha_channel(image_path, mask_path, transparency=0.5):
     # Open the image and mask
@@ -53,6 +54,7 @@ def generate_image(image_path, mask_path, text, api_key=None):
             "clip_guidance_preset": "FAST_BLUE",
             "samples": 2,
             "steps": 50,
+            "style_preset": "enhance",
         }
     )
 
@@ -100,14 +102,36 @@ def generate_image_upscale(image_path, api_key=None):
     with open(image_path, "wb") as f:
         f.write(response.content)
 
-def paint_by_example(pipe, init_image, mask_image, example_image, filename="./static/images/image_inpaint.png"):
-    pipe = DiffusionPipeline.from_pretrained(
-    "Fantasy-Studio/Paint-by-Example",
-    torch_dtype=torch.float16,
-    )
+def paint_by_example(image_path, mask_path, guide_path, num_images_per_prompt=1, filename="./static/images/image_inpaint.png", device="cuda"):
+    init_image = Image.open(image_path)
+    mask_image = Image.open(mask_path)
+    example_image = Image.open(guide_path)
+    
+    if device == "cuda":
+        pipe = DiffusionPipeline.from_pretrained(
+        "Fantasy-Studio/Paint-by-Example",
+        torch_dtype=torch.float16,
+        )
 
-    pipe = pipe.to(device)
+        pipe = pipe.to('cuda')
 
-    image = pipe(image=init_image, mask_image=mask_image, example_image=example_image, guidance_scale=15).images[0]
+    else:
+        pipe = DiffusionPipeline.from_pretrained(
+        "Fantasy-Studio/Paint-by-Example",
+        )
+
+    images = pipe(image=init_image, mask_image=mask_image, example_image=example_image, guidance_scale=15, num_images_per_prompt=num_images_per_prompt).images
+    generated_image_paths = []
+
+    for i, image in enumerate(images):
+        # Generate a unique file name using a timestamp
+        timestamp = int(time.time() * 1000)
+        output_path = f"./static/images/img2img_example_{i}_{timestamp}.png"
+
+        image.save(output_path)
+        generated_image_paths.append(output_path)
+
+    return generated_image_paths
+    
     image.save(filename)
     return filename

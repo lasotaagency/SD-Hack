@@ -48,9 +48,9 @@ def transform_image(image) -> torch.Tensor:
 
 class LangSAM():
 
-    def __init__(self, sam_type="vit_h"):
+    def __init__(self, sam_type="vit_h", device="cuda"):
         self.sam_type = sam_type
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = device
         self.build_groundingdino()
         self.build_sam(sam_type)
 

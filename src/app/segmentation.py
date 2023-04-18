@@ -4,6 +4,34 @@ import cv2
 from config import sam_checkpoint, model_type, device
 from PIL import Image
 import torch
+import os
+
+def resize_image(image_path, output_folder, filename, multiple=64):
+    """
+    Resize an image so that its dimensions are multiples of a given number while maintaining its aspect ratio.
+
+    :param image: A PIL Image object
+    :param multiple: An integer value that dimensions must be a multiple of (default: 64)
+    :return: A PIL Image object with resized dimensions
+    """
+    image = Image.open(image_path)
+    width, height= image.size
+    aspect_ratio = float(width) / float(height)
+
+    # Calculate new dimensions
+    new_height = int(height // multiple * multiple)
+    new_width = int(aspect_ratio * new_height)
+
+    # Make sure the width is also a multiple of the given number
+    new_width = new_width // multiple * multiple
+
+    filename, file_extension = os.path.splitext(filename)
+    # Resize the image
+    resized_image = image.resize((new_width, new_height), Image.ANTIALIAS)
+    resized_image_path = os.path.join(output_folder, f"{filename}_resized{file_extension}")
+    resized_image.save(resized_image_path)
+    print("Resized image saved to", resized_image_path)
+    return resized_image_path
 
 def save_image_mask(mask, filename):
     """
