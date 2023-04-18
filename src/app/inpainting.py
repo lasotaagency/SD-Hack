@@ -4,6 +4,7 @@ import requests
 from PIL import Image
 import numpy as np
 import time
+from diffusers import DiffusionPipeline
 
 def add_alpha_channel(image_path, mask_path, transparency=0.5):
     # Open the image and mask
@@ -98,3 +99,15 @@ def generate_image_upscale(image_path, api_key=None):
 
     with open(image_path, "wb") as f:
         f.write(response.content)
+
+def paint_by_example(pipe, init_image, mask_image, example_image, filename="./static/images/image_inpaint.png"):
+    pipe = DiffusionPipeline.from_pretrained(
+    "Fantasy-Studio/Paint-by-Example",
+    torch_dtype=torch.float16,
+    )
+
+    pipe = pipe.to(device)
+
+    image = pipe(image=init_image, mask_image=mask_image, example_image=example_image, guidance_scale=15).images[0]
+    image.save(filename)
+    return filename
