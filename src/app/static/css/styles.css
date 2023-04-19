@@ -11,9 +11,10 @@ form {
     gap: 1rem;
 }
 
-#uploaded-image {
+#uploaded-image,
+#generated-images img {
     max-width: 100%;
+    width: 300px;
     height: auto;
     cursor: crosshair;
 }
-

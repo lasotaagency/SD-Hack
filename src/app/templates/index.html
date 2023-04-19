@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Upload and Coordinates Display</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.6.0/fabric.min.js"></script>
 </head>
 <body>
     <form method="POST" enctype="multipart/form-data">
@@ -14,12 +15,16 @@
     {% if image_url %}
         <div id="uploaded-image-container">
             <img src="{{ image_url }}" alt="uploaded-image" id="uploaded-image">
+            <!-- <canvas id="uploaded-image" alt="image-canvas" data-image-url="{{ image_url }}" style="border: 1px solid;" width="500" height="500"></canvas> -->
             <p id="coordinates">Coordinates: (0, 0)</p>
             <select id="options">
                 {% for article in articles_detected %}
                     <option value="{{ article }}">{{ article }}</option>
                 {% endfor %}
             </select>
+            <script>
+                const segmentsData = {{ segments_data|tojson }};
+            </script>
             <div>
                 <input type="radio" name="input_type" value="text" id="text-option" checked>
                 <label for="text-option">Text</label>
@@ -34,5 +39,6 @@
         <div id="generated-images" style="display: none;"></div>
     {% endif %}
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/highlighter.js') }}"></script>
 </body>
 </html>

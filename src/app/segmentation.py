@@ -72,7 +72,7 @@ def startup_sam():
 def get_lang_sam_mask(model, image_path, text_prompt):
     image_pil = Image.open(image_path)
     masks, boxes, phrases, logits = model.predict(image_pil, text_prompt)
-    
+
     if len(logits) > 0:
         # Initialize an empty mask with the same dimensions as the input masks
         aggregated_mask = np.zeros_like(masks[0].numpy(), dtype=bool)
@@ -88,6 +88,6 @@ def get_lang_sam_mask(model, image_path, text_prompt):
         if count > 0:
             filename = f"static/masks/{text_prompt}_mask.png"
             save_image_mask(aggregated_mask, filename)
-            return text_prompt, filename
+            return text_prompt, filename, boxes[0].detach().cpu().tolist()
 
-    return None, None
+    return None, None, None

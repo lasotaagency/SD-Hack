@@ -26,6 +26,7 @@ def upload_image():
             image.save(image_path)
 
             articles_detected = []
+            bbox_list = []
 
             resized_image_path = resize_image(image_path, app.config["IMAGE_UPLOADS"], image.filename)
             
@@ -33,7 +34,9 @@ def upload_image():
             for text_prompt in clothing_types:
                 st = timeit.default_timer()
                 # mask_path = get_mask(predictor, image_path, np.array([[x,y]]))
-                article, filename = get_lang_sam_mask(model, resized_image_path, text_prompt)
+                article, filename, bbox = get_lang_sam_mask(model, resized_image_path, text_prompt)
+                print(bbox)
+                bbox_list.append({"name": article, "coordinates": bbox})
 
                 if article:
                     mask_map[article] = filename
@@ -48,7 +51,7 @@ def upload_image():
                 mask_map['background'] = './static/masks/background_mask.png'
 
             # model = 0
-            return render_template("index.html", image_url=resized_image_url, articles_detected=list(mask_map.keys()), masks=list(mask_map.values()))
+            return render_template("index.html", image_url=resized_image_url, articles_detected=list(mask_map.keys()), segments_data=bbox_list)
         
     return render_template("index.html")
 
