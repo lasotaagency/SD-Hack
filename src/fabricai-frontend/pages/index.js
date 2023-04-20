@@ -3,22 +3,60 @@ import Image from "next/image";
 import { useState } from "react";
 
 const SideBar = ({ articles }) => {
+  const [inputOption, setInputOption] = useState('text');
+
   return (
     <div className="w-[20%] bg-[#088395] flex flex-col content-center text-center relative">
-      <Dropdown
-        options={articles}
-        className="w-[80%] bg-[#D9D9D9] p-2 mt-16 text-[#0A4D68] mx-auto"
-      />
-      <h2 className="mt-32">Text Based Edit</h2>
-      <input className="w-[80%] bg-[#D9D9D9] p-2 mt-2 text-[#0A4D68] mx-auto" />
-      <h2 className="mt-32">Image Based Edit</h2>
-      <input
-        type="file"
-        className="w-[80%] bg-[#D9D9D9] p-2 mt-2 text-[#0A4D68] mx-auto"
-      />
-      <button className="w-[80%] bg-[#D9D9D9] p-2 mt-2 text-[#0A4D68] mx-auto">
-        Submit
-      </button>
+      {articles.length > 0 && (
+        <>
+          {/* <h3 className="text-[#0A4D68]">Autodetected Clothing Options</h3> */}
+          <div className="mt-32">Autodetected Clothing Options</div>
+          <Dropdown
+            options={articles}
+            className="w-[80%] mt-4 bg-[#D9D9D9] p-2 text-[#0A4D68] mx-auto"
+          />
+          <div className="mt-32">
+            <div>
+              <label>
+                <input
+                  type="radio"
+                  value="text"
+                  checked={inputOption === 'text'}
+                  onChange={(e) => setInputOption(e.target.value)}
+                />
+                Text Based Edit
+              </label>
+            </div>
+            <div>
+              <label>
+                <input
+                  type="radio"
+                  value="image"
+                  checked={inputOption === 'image'}
+                  onChange={(e) => setInputOption(e.target.value)}
+                />
+                Image Based Edit
+              </label>
+            </div>
+          </div>
+          {inputOption === 'text' && (
+            <>
+              <input className="w-[80%] bg-[#D9D9D9] p-2 mt-2 text-[#0A4D68] mx-auto" />
+            </>
+          )}
+          {inputOption === 'image' && (
+            <>
+              <input
+                type="file"
+                className="w-[80%] bg-[#D9D9D9] p-2 mt-2 text-[#0A4D68] mx-auto"
+              />
+            </>
+          )}
+          <button className="w-[80%] bg-[#D9D9D9] p-2 mt-2 text-[#0A4D68] mx-auto">
+            Submit
+          </button>
+        </>
+      )}
       <Image
         src={"/fabric.ai.png"}
         width={120}
@@ -46,7 +84,7 @@ export default function Home() {
 
     try {
       const response = await fetch(
-        "https://c2ae-108-234-21-0.ngrok-free.app/upload_image",
+        "https://8005-108-234-21-0.ngrok-free.app/upload_image",
         {
           method: "POST",
           body: formData,
