@@ -38,6 +38,9 @@ export default function Home() {
       const response = await fetch(`${baseURI}/upload_image`, {
         method: "POST",
         body: formData,
+        headers: {
+          "ngrok-skip-browser-warning": "1",
+        },
       })
         .then((res) => res.json())
         .then((data) => {
@@ -68,6 +71,7 @@ export default function Home() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "1",
           },
           body: JSON.stringify({
             image_url: currImageURL,
@@ -111,6 +115,7 @@ export default function Home() {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
+                "ngrok-skip-browser-warning": "1"
               },
               body: JSON.stringify({
                 image_url: currImageURL,
