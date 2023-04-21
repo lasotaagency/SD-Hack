@@ -1,6 +1,7 @@
 import Dropdown from "react-dropdown";
 import Image from "next/image";
 import { useState } from "react";
+import { Spinner } from "react-bootstrap";
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -9,6 +10,7 @@ export default function Home() {
   const [prevImageURLs, setPrevImageURLs] = useState([]);
   const [articles, setArticles] = useState([]);
   const [selectedArticle, setSelectedArticle] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const [inputOption, setInputOption] = useState("");
   const [textInput, setTextInput] = useState("");
@@ -26,10 +28,12 @@ export default function Home() {
 
   const handleUpload = async () => {
     if (!selectedFile) return;
-
+  
+    setIsLoading(true);
+  
     const formData = new FormData();
     formData.append("file", selectedFile);
-
+  
     try {
       const response = await fetch(`${baseURI}/upload_image`, {
         method: "POST",
@@ -47,11 +51,14 @@ export default function Home() {
         });
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSubmit = async () => {
     console.log("submit");
+    setIsLoading(true);
 
     if (inputOption === "text") {
       console.log(textInput);
@@ -130,6 +137,7 @@ export default function Home() {
             });
         });
     }
+    setIsLoading(false);
   };
 
   const handlePreviousImageClick = (index) => {
@@ -145,12 +153,12 @@ export default function Home() {
 
   return (
     <>
-      <div className="min-h-screen w-screen flex flex-row justify-stretch content-stretch">
+      <div className="h-screen w-screen flex flex-row justify-stretch content-stretch">
         <div className="w-[20%] bg-[#088395] flex flex-col content-center text-center relative">
           {articles.length > 0 && (
             <>
               {/* <h3 className="text-[#0A4D68]">Autodetected Clothing Options</h3> */}
-              <div className="mt-32">Autodetected Clothing Options</div>
+              <div className="mt-32">Select a Clothing Options</div>
               <Dropdown
                 options={articles}
                 className="w-[80%] mt-4 bg-[#D9D9D9] p-2 text-[#0A4D68] mx-auto"
@@ -202,13 +210,21 @@ export default function Home() {
               <button
                 className="w-[80%] bg-[#D9D9D9] p-2 mt-2 text-[#0A4D68] mx-auto"
                 onClick={handleSubmit}
+                disabled={isLoading}
               >
-                Submit
+                {isLoading ? (
+                  <>
+                    <Spinner animation="border" size="sm" />
+                    <span className="ml-2">Generating...</span>
+                  </>
+                ) : (
+                  "Upload"
+                )}
               </button>
             </>
           )}
           <Image
-            src={"/fabric.ai.png"}
+            src={"/public/fabric.ai.png"}
             width={120}
             height={200}
             className="absolute bottom-8 left-0 right-0 ml-auto mr-auto"
@@ -225,12 +241,21 @@ export default function Home() {
 
           {!currImageURL && (
             <>
+              <h3 className="text-center">Upload an Image</h3>
               <input type="file" className="p-2 mx-auto" onChange={handleFileSelect} />
               <button
-                className="p-2 w-fit mx-auto bg-gray-600 text-white"
+                className={`p-2 w-fit mx-auto text-white ${isLoading ? "bg-red-600" : "bg-gray-600"}`}
                 onClick={handleUpload}
+                disabled={isLoading}
               >
-                Upload
+                {isLoading ? (
+                  <>
+                    <Spinner animation="border" size="sm" />
+                    <span className="ml-2">Uploading...</span>
+                  </>
+                ) : (
+                  "Upload"
+                )}
               </button>
             </>
           )}
