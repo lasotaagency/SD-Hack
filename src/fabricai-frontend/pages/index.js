@@ -87,6 +87,7 @@ export default function Home() {
             generatedUrl2,
           ]);
           setCurrImageURL(generatedUrl2);
+          setIsLoading(false);
         });
     } else if (inputOption === "image") {
       const additionalFormData = new FormData();
@@ -134,10 +135,10 @@ export default function Home() {
                 generatedUrl2,
               ]);
               setCurrImageURL(generatedUrl2);
+              setIsLoading(false);
             });
         });
     }
-    setIsLoading(false);
   };
 
   const handlePreviousImageClick = (index) => {
