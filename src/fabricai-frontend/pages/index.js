@@ -145,7 +145,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="h-screen w-screen flex flex-row justify-stretch content-stretch">
+      <div className="min-h-screen w-screen flex flex-row justify-stretch content-stretch">
         <div className="w-[20%] bg-[#088395] flex flex-col content-center text-center relative">
           {articles.length > 0 && (
             <>
@@ -219,13 +219,13 @@ export default function Home() {
             <img
               src={currImageURL}
               alt="uploaded"
-              className="h-[256px] w-auto mx-auto"
+              className="h-[384px] w-auto mx-auto"
             />
           )}
 
           {!currImageURL && (
             <>
-              <input type="file" className="p-2" onChange={handleFileSelect} />
+              <input type="file" className="p-2 mx-auto" onChange={handleFileSelect} />
               <button
                 className="p-2 w-fit mx-auto bg-gray-600 text-white"
                 onClick={handleUpload}
@@ -243,7 +243,7 @@ export default function Home() {
                   <img
                     src={url}
                     alt="uploaded"
-                    className="h-[256px] w-auto"
+                    className="h-[384px] w-auto"
                     onClick={() => handlePreviousImageClick(index)}
                     key={index}
                   />
