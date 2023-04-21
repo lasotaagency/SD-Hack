@@ -154,7 +154,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="h-screen w-screen flex flex-row justify-stretch content-stretch">
+      <div className="min-h-screen w-screen flex flex-row justify-stretch content-stretch">
         <div className="w-[20%] bg-[#088395] flex flex-col content-center text-center relative">
           {articles.length > 0 && (
             <>
@@ -225,7 +225,7 @@ export default function Home() {
             </>
           )}
           <Image
-            src={"/public/fabric.ai.png"}
+            src={"/fabric.ai.png"}
             width={120}
             height={200}
             className="absolute bottom-8 left-0 right-0 ml-auto mr-auto"
