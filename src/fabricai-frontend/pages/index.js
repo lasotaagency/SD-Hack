@@ -16,7 +16,7 @@ export default function Home() {
   const [textInput, setTextInput] = useState("");
   const [imageInput, setImageInput] = useState("");
 
-  const baseURI = "https://f034-108-234-21-0.ngrok-free.app";
+  const baseURI = "https://623f-108-234-21-0.ngrok-free.app";
 
   const handleFileSelect = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -66,7 +66,7 @@ export default function Home() {
     if (inputOption === "text") {
       console.log(textInput);
       const response = await fetch(
-        "https://f034-108-234-21-0.ngrok-free.app/submit",
+        "https://623f-108-234-21-0.ngrok-free.app/submit",
         {
           method: "POST",
           headers: {
@@ -99,7 +99,7 @@ export default function Home() {
       console.log(additionalFile);
 
       const response = await fetch(
-        "https://f034-108-234-21-0.ngrok-free.app/upload_additional_image",
+        "https://623f-108-234-21-0.ngrok-free.app/upload_additional_image",
         {
           method: "POST",
           body: additionalFormData,
@@ -110,7 +110,7 @@ export default function Home() {
           console.log(data);
           console.log("HERE");
           const response = fetch(
-            "https://f034-108-234-21-0.ngrok-free.app/submit",
+            "https://623f-108-234-21-0.ngrok-free.app/submit",
             {
               method: "POST",
               headers: {
@@ -120,7 +120,7 @@ export default function Home() {
               body: JSON.stringify({
                 image_url: currImageURL,
                 condition_data:
-                  "https://f034-108-234-21-0.ngrok-free.app" +
+                  "https://623f-108-234-21-0.ngrok-free.app" +
                   data["image_url"],
                 condition_type: "image",
                 option: selectedArticle,
